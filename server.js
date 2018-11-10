@@ -37,37 +37,34 @@ app.post("/new/news", (req, res) => {
     let z = req.body.z;
     let resArray = [];
     let iteration = 0;
-    //sees if a z has been created from previous run
-    
-        axios.get(`https://www.thestar.com.my/tech/tech-news/?pgno=${z}`).then(response => {
-            // Then, we load that into cheerio and save it to $ for a shorthand selector
-            var $ = cheerio.load(response.data);
-            // Now, we grab every h2 within an article tag, and do the following:
-            $('.list-listing').each((i, element) => {
-                // Save an empty result object
-                const result = {};
-                result.date = $(element).find("label").text();
-                result.title = $(element).find(".f18").text();
-                result.link = $(element).find(".f18").find("a").attr("href");
-                result.story = $(element).find("p").text();
-                result.image = $(element).find("img").attr("src");
-                result.note = "No note currently.";
-                resArray.push(result);
-                // iteration += 1;
-                // console.log(iteration);
-            })
-            console.log(resArray)
-            res.json(resArray);
-        });
+    axios.get(`https://www.thestar.com.my/tech/tech-news/?pgno=${z}`).then(response => {
+        // Then, we load that into cheerio and save it to $ for a shorthand selector
+        var $ = cheerio.load(response.data);
+        // Now, we grab every h2 within an article tag, and do the following:
+        $('.list-listing').each((i, element) => {
+            // Save an empty result object
+            const result = {};
+            result.date = $(element).find("label").text();
+            result.title = $(element).find(".f18").text();
+            result.link = $(element).find(".f18").find("a").attr("href");
+            result.story = $(element).find("p").text();
+            result.image = $(element).find("img").attr("src");
+            result.note = "No note currently.";
+            resArray.push(result);
+            // iteration += 1;
+            // console.log(iteration);
+        })
+        res.json(resArray);
+    });
 });
 
-app.get("saved/news", (req, res) => {
+app.get("/saved/news", (req, res) => {
     db.News.find({}).then(results => {
       res.json(results);
     });
 });
 
-app.post("save/news", (req, res) => {
+app.post("/save/news", (req, res) => {
     db.News.create({
         link: req.body.link,
         date: req.body.date,
@@ -75,57 +72,25 @@ app.post("save/news", (req, res) => {
         story: req.body.story,
         image: req.body.image,
         note: req.body.note
-    }).then(entry => {res.json(entry);})
+    }).then(entry => {console.log(entry); res.json(entry);})
         .catch(err => {
             return res.json(err);    
         });
 });
 
-// app.
+app.post("/delete/news", (req, res) => {
+    console.log(req.body)
+    db.News.deleteOne({"_id": req.body.deleteId}).then(
+        entry => {console.log(entry)}
+    )
+});
 
-
-
-// Route for getting all Articles from the db
-// app.get("delete/news", function (req, res) {
-//     db.Note.findByIdAndRemove({})
-// });
-
-// Route for grabbing a specific Article by id, populate it with it's note
-// app.get("/articles/:id", function (req, res) {
-//     // TODO
-//     // ====
-//     // Finish the route so it finds one article using the req.params.id,
-//     // and run the populate method with "note",
-//     // then responds with the article with the note included
-//     db.Article.find({
-//         _id: req.params.id
-//     })
-//         .populate("note")
-//         .then(dbLibrary => {
-//             res.json(dbLibrary);
-//         })
-//         .catch(err => {
-//             res.json(err);
-//         });
-// });
-// // Route for saving/updating an Article's associated Note
-// app.post("/articles/:id", function (req, res) {
-//     // TODO
-//     // ====
-//     console.log(req.params.id)
-//     db.Note.create(req.body)
-//         .then((dbNote) => {
-//             return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
-//         })
-//         .then((dbUser) => {
-//             res.json(dbUser);
-//         })
-//         .catch((err) => {
-//             res.json(err);
-//         })
-
-// });
-
+app.post("/comment/news", (req, res) => {
+    console.log(req.body)
+    db.News.update({"_id": req.body.commentId}, {$set: {"note": req.body.note}}).then(
+        entry => {console.log(entry)}
+    )
+});
 // Start the server
 app.listen(PORT, function () {
     console.log("App running on port " + PORT + "!");

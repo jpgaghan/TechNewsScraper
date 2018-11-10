@@ -1,0 +1,59 @@
+<div class="jumbotron jumbotron-fluid bg-success border border-dark">
+  <h1 class="display-4 font-weight-bold text-center text-danger">Eat-Da-Burger</h1>
+</div>
+
+<div class="container">
+
+  <div class="row spacer"></div>
+
+  <div class="row">
+
+
+    <div class='col-sm-4'>
+      <div class="text-center card border border-dark bg-success">
+        <div class="card-body text-danger">
+          <h2>Devour Burger</h2>
+        </div>
+      </div>
+      {{#each burger}}
+        {{#unless devoured}}
+          {{> burgers/burger-block devoured=true}}
+        {{/unless}}
+      {{/each}}
+    </div>
+
+
+    <div class="col-sm-4">
+      <div class="card text-center bg-warning mx-auto" style="width: 18rem;">
+        <img class="card-img-top" src="/assets/img/burger.jpg" alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">Add Burger</h5>
+          <form class="create-form">
+            <div class="form-group">
+              <input type="text" id="ca" name="name">
+              <div class = "row small-spacer"></div>
+              <button type="submit">Add Burger</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col-sm-4">
+      <div class="text-center card border bg-success border-dark">
+        <div class="card-body text-danger">
+          <h2>Devoured Burger</h2>
+        </div>
+      </div>
+
+      {{#each burger}}
+        {{#if devoured}}
+          {{> burgers/eaten-burger-block devoured=true}}
+        {{/if}}
+      {{/each}}
+
+    </div>
+  </div>
+  <div class = "row spacer"></div>
+</div>

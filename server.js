@@ -17,10 +17,6 @@ var PORT = 3000;
 var app = express();
 
 // Configure middleware
-
-// Use morgan logger for logging requests
-// app.use(logger("dev"));
-// Parse request body as JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // Make public a static folder
@@ -51,8 +47,6 @@ app.post("/new/news", (req, res) => {
             result.image = $(element).find("img").attr("src");
             result.note = "No note currently.";
             resArray.push(result);
-            // iteration += 1;
-            // console.log(iteration);
         })
         res.json(resArray);
     });
@@ -64,14 +58,26 @@ app.get("/saved/news", (req, res) => {
     });
 });
 
+app.post("/append/comments", (req,res) => {
+    db.Note.find({commentId: req.body.commentId}).then(results => {
+        res.json(results)
+    })
+});
+
 app.post("/save/news", (req, res) => {
+    var note = db.Note({
+        _id: new mongoose.Types.ObjectId(),
+        commentId: '',
+        note: req.body.note
+    });
+    note.save(err => console.log(err))
     db.News.create({
         link: req.body.link,
         date: req.body.date,
         title: req.body.title,
         story: req.body.story,
         image: req.body.image,
-        note: req.body.note
+        note: note._id
     }).then(entry => {console.log(entry); res.json(entry);})
         .catch(err => {
             return res.json(err);    
@@ -79,16 +85,21 @@ app.post("/save/news", (req, res) => {
 });
 
 app.post("/delete/news", (req, res) => {
-    console.log(req.body)
     db.News.deleteOne({"_id": req.body.deleteId}).then(
+        entry => {console.log(entry)}
+    )
+});
+
+app.post("/delete/comment", (req, res) => {
+    db.Note.deleteOne({"_id": req.body.id}).then(
         entry => {console.log(entry)}
     )
 });
 
 app.post("/comment/news", (req, res) => {
     console.log(req.body)
-    db.News.update({"_id": req.body.commentId}, {$set: {"note": req.body.note}}).then(
-        entry => {console.log(entry)}
+    db.Note.create({commentId: req.body.commentId, note: req.body.note}).then(
+        entry => {res.json(entry)}
     )
 });
 // Start the server
